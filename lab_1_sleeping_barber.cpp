@@ -2,7 +2,7 @@
 /*
  *	OS Lab #1.
  *	The sleeping barber problem solving using
- *	critical sections. OS Windows.
+ *	semaphores. OS Windows.
  *
  *	Author: Andriy Tokarskiy
  *	IASA, DA-32, Variant #21
