@@ -8,7 +8,6 @@
  *	IASA, DA-32, Variant #21
  */
 
-#include "List.h"
 #include <Windows.h>
 #include <iostream>
 
