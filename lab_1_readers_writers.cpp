@@ -1,5 +1,13 @@
 
-
+/*
+ *	OS Lab #1.
+ *	The readers-writers problem solving using 
+ *	critical sections. OS Windows.
+ *
+ *	Author: Andriy Tokarskiy
+ *	IASA, DA-32, Variant #21
+ */
+ 
 #include <process.h>
 #include <Windows.h>
 #include <iostream>
