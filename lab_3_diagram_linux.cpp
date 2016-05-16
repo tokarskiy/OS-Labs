@@ -12,22 +12,9 @@
  *
  *	Author: Andriy Tokarskiy
  *	IASA, DA-32, Variant #21
+ *
+ *	compile it using command g++ lab_3_diagram_linux.cpp -o diagram
  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <string.h>
-#include <string>
-#include <limits.h>
-#include <vector>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-
-#define DIAGRAM_STEP 1024
 
 void readDirectory (std::string dirName, 
 					std::vector<long>& sizes, 
@@ -55,9 +42,9 @@ void readDirectory (std::string dirName,
 			continue;
 		}
 
-		strncpy( pathName, dirName.c_str(), PATH_MAX);
-		strncat( pathName, "/", PATH_MAX );
-        strncat( pathName, entry.d_name, PATH_MAX );
+		strncpy(pathName, dirName.c_str(), PATH_MAX);
+		strncat(pathName, "/", PATH_MAX);
+        strncat(pathName, entry.d_name, PATH_MAX);
 
         if (lstat(pathName, &entryInfo) == 0){
         	// if it is folder
@@ -84,17 +71,18 @@ void readDirectory (std::string dirName,
 int main(int argc, char* argv[]){
 	std::vector<long> sizes;
 	std::vector<std::string> names;
+	std::string directory = argc == 2 ? argv[1] : ".";
 
-	readDirectory(".", sizes, names);
+	readDirectory(directory, sizes, names);
 
 	for (int i = 0; i < sizes.size(); i++) {
 		long a = sizes[i] / DIAGRAM_STEP;
 		printf("[");
 		for (long j = 0; j < a; j++) {
-			printf("-");
+			printf("=");
 		}
 		if (sizes[i] % DIAGRAM_STEP != 0) {
-			printf("-");
+			printf("=");
 		}
 		printf("] - %s\n", names[i].c_str());
 	}
