@@ -1,3 +1,12 @@
+
+/*
+ *	OS Lab #2.
+ *	A task manager for OS Linux
+ *
+ *	Author: Andriy Tokarskiy
+ *	IASA, DA-32, Variant #21
+ */
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
