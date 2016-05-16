@@ -16,6 +16,21 @@
  *	compile it using command g++ lab_3_diagram_linux.cpp -o diagram
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <string>
+#include <limits.h>
+#include <vector>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <unistd.h>
+
+#define DIAGRAM_STEP 1024
+
 void readDirectory (std::string dirName, 
 					std::vector<long>& sizes, 
 					std::vector<std::string>& names) {
