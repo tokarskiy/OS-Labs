@@ -1,13 +1,13 @@
 
 /*
- *		OS Lab #3.
+ *	OS Lab #3.
  *  	My 'ls' command 
  *  	от 1024 до 2047 байт — в следующий интервал и т.д.).
  *
  *  	OS Linux
  *
- *		Author: Andriy Tokarskiy
- *		IASA, DA-32, Variant #21
+ *	Author: Andriy Tokarskiy
+ *	IASA, DA-32, Variant #21
  */
 
 #include <stdio.h>
@@ -24,8 +24,8 @@
 #include <unistd.h>
 
 void readDirectory (std::string dirName, 
-					std::vector<std::string>& names
-					std::vector<bool>& isFolder) {
+			std::vector<std::string>& names
+			std::vector<bool>& isFolder) {
 	DIR* dir = NULL;
 	struct dirent entry;
 	struct dirent *entryPointer = NULL;
