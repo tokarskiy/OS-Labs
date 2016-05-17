@@ -24,8 +24,8 @@
 #include <unistd.h>
 
 void readDirectory (std::string dirName, 
-			std::vector<std::string>& names
-			std::vector<bool>& isFolder) {
+		std::vector<std::string>& names,
+		std::vector<bool>& isFolder) {
 	DIR* dir = NULL;
 	struct dirent entry;
 	struct dirent *entryPointer = NULL;
@@ -54,8 +54,16 @@ void readDirectory (std::string dirName,
         strncat(pathName, entry.d_name, PATH_MAX);
 
         std::string fileName(entry.d_name); 
-        names.push_back(fileName);
+        
 
+        if (lstat(pathName, &entryInfo) == 0){
+        	// if it is folder
+        	names.push_back(fileName);
+        	isFolder.push_back(S_ISDIR(entryInfo.st_mode));
+        }
+        else{
+        	continue;
+        }
         // next file
         readdir_r(dir, &entry, &entryPointer);
 	}
@@ -65,6 +73,7 @@ void readDirectory (std::string dirName,
 int main(int argc, char* argv[]){
 	std::vector<std::string> names;
 	std::vector<std::string> folders;
+	std::vector<bool> isFolder;
 	if (argc == 1){
 		folders.push_back(".");
 	}
@@ -77,11 +86,11 @@ int main(int argc, char* argv[]){
 	}
 
 	for (int i = 0; i < folders.size(); i++){
-		readDirectory(folders[i], names);
+		readDirectory(folders[i], names, isFolder);
 	}
 
 	for (int i = 0; i < names.size(); i++) {
-		printf("%s\n", names[i].c_str());
+		printf("%40s %6s\n", names[i].c_str(), isFolder[i] ? "FOLDER" : "FILE");
 	}
 
 	return 0;
