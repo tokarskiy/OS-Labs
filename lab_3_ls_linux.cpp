@@ -25,7 +25,6 @@
 struct FileInfo{
     std::string name;
     mode_t mode;
-    nlink_t nlink;
     std::string uid;
     std::string gid;
     off_t size;
@@ -42,7 +41,7 @@ struct FileInfo{
         printf((mode & S_IROTH) ? "r" : "-");
         printf((mode & S_IWOTH) ? "w" : "-");
         printf((mode & S_IXOTH) ? "x" : "-");
-        printf("%4d %7s %7s ", nlink, uid.c_str(), gid.c_str());
+        printf("%7s %7s ", uid.c_str(), gid.c_str());
         time ( &mtim);
 		
 		printf("%7d ", (int)size);
@@ -70,7 +69,6 @@ void FindFiles(char dir[256], std::vector<FileInfo>& files)
             FileInfo tempDir;
             tempDir.name = direntry->d_name;
             tempDir.mode = fileinfo.st_mode;
-            tempDir.nlink = fileinfo.st_nlink;
             struct passwd *pw = getpwuid(fileinfo.st_uid);
             struct group  *gr = getgrgid(fileinfo.st_gid);
             tempDir.uid = std::string(pw->pw_name);
