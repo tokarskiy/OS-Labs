@@ -14,32 +14,50 @@
  *	IASA, DA-32, Variant #21
  */
 
-#include <Windows.h>
-#include <tchar.h>
-#include <iostream>
-#include <vector>
 #include <string>
+#include <map>
 
-#define DIAGRAM_STEP 10000
+#define DIAGRAM_STEP 1
+#define SIZE_STEP 2000
+
+struct FileInfo {
+	std::string name;
+	long size;
+	bool isDirectory;
+	
+};
 
 void AddFilesSizeToVector(std::string directory, std::string filter, std::vector<long>& sizes, std::vector<std::string>& fileNames);
 
 int main(int argc, char **argv) {
-
+	std::map<long, int> statistic;
 	std::vector<std::string> fileNames;
 	std::vector<long> sizes;
 	AddFilesSizeToVector(".\\", "*.*", sizes, fileNames);
 
 	for (int i = 0; i < sizes.size(); i++) {
-		long a = sizes[i] / DIAGRAM_STEP;
+		if (statistic.find(sizes[i] / SIZE_STEP) != statistic.end()) {
+			statistic[sizes[i] / SIZE_STEP]++;
+		}
+		else {
+			statistic.insert(std::pair<long, int>(sizes[i] / SIZE_STEP, 1));
+
+		}
+		//printf("%ld %d\n", sizes[i] / 1024, statistic[sizes[i] / 1024]);
+	}
+
+	std::map<long, int>::iterator at = statistic.begin();
+
+	for (; at != statistic.end(); ++at) {
+		if (at->second == 0) {
+			continue;
+		}
+		printf("%ld - %ld\n", at->first * 1024, (at->first + 1) * 1024);
 		printf("[");
-		for (long i = 0; i < a; i++) {
-			printf("|");
+		for (int j = 0; j < at->second; j += DIAGRAM_STEP) {
+			printf("=");
 		}
-		if (sizes[i] % DIAGRAM_STEP != 0) {
-			printf("|");
-		}
-		printf("] - %s\n", fileNames[i].c_str());
+		printf("] - %d files.\n", at->second);
 	}
 
 	system("pause");
@@ -48,7 +66,10 @@ int main(int argc, char **argv) {
 
 
 #pragma warning(disable: 4996)
-void AddFilesSizeToVector(std::string directory, std::string filter, std::vector<long>& sizes, std::vector<std::string>& fileNames) {
+void AddFilesSizeToVector(std::string directory, 
+		std::string filter, 
+		std::vector<long>& sizes, 
+		std::vector<std::string>& fileNames) {
 	WIN32_FIND_DATA fileData;
 	HANDLE fileHandle = FindFirstFile((directory + filter).c_str(), &fileData);
 
