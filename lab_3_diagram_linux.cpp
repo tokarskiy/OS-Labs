@@ -23,13 +23,14 @@
 #include <string>
 #include <limits.h>
 #include <vector>
+#include <map>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
 
-#define DIAGRAM_STEP 1024
+#define DIAGRAM_STEP 200
 
 void readDirectory (std::string dirName, 
 					std::vector<long>& sizes, 
@@ -87,20 +88,37 @@ int main(int argc, char* argv[]){
 	std::vector<long> sizes;
 	std::vector<std::string> names;
 	std::string directory = argc == 2 ? argv[1] : ".";
+	std::map<long, int> statistic;
 
 	readDirectory(directory, sizes, names);
 
-	for (int i = 0; i < sizes.size(); i++) {
-		long a = sizes[i] / DIAGRAM_STEP;
-		printf("[");
-		for (long j = 0; j < a; j++) {
-			printf("=");
+	for (int i = 0; i < sizes.size(); i++){
+		if (statistic.find(sizes[i] / 20000) != statistic.end()){
+			statistic[sizes[i] / 20000]++;
 		}
-		if (sizes[i] % DIAGRAM_STEP != 0) {
-			printf("=");
-		}
-		printf("] - %s\n", names[i].c_str());
-	}
+		else{
+			statistic.insert(std::pair<long, int>(sizes[i] / 20000, 1));
 
+		}
+		//printf("%ld %d\n", sizes[i] / 1024, statistic[sizes[i] / 1024]);
+	}
+	
+	std::map<long, int>::iterator at = statistic.begin();
+
+	for ( ; at != statistic.end(); ++at) {
+		if (at->second == 0){
+			continue;
+		}
+		printf("%ld - %ld\n", at->first * 1024, (at->first + 1) * 1024);
+		printf("[");
+		for (int j = 0; j < at->second; j += DIAGRAM_STEP) {
+			printf("=");
+		}
+		if (at->second % DIAGRAM_STEP != 0) {
+			printf("=");
+		}
+		printf("]\n");
+	}
+	
 	return 0;
 }
