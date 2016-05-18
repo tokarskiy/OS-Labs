@@ -29,9 +29,9 @@ struct FileInfo{
     std::string gid;
     off_t size;
     time_t mtim;
-	
-	void Print(){
-		printf((S_ISDIR(mode)) ? "d" : "-");
+    
+    void Print(){
+        printf((S_ISDIR(mode)) ? "d" : "-");
         printf((mode & S_IRUSR) ? "r" : "-");
         printf((mode & S_IWUSR) ? "w" : "-");
         printf((mode & S_IXUSR) ? "x" : "-");
@@ -41,13 +41,13 @@ struct FileInfo{
         printf((mode & S_IROTH) ? "r" : "-");
         printf((mode & S_IWOTH) ? "w" : "-");
         printf((mode & S_IXOTH) ? "x" : "-");
-        printf("%7s %7s ", uid.c_str(), gid.c_str());
+        printf("  %7s   %7s   ", uid.c_str(), gid.c_str());
         time ( &mtim);
-		
-		printf("%7d ", (int)size);
-        printf("%30s   ", name.c_str());
-        printf ( "%s", ctime (&mtim) );
-	}
+        
+        printf("  %7d  ", (int)size);
+        printf("  %30s  ", name.c_str());
+        printf ( "  %s" , ctime (&mtim) );
+    }
 };
 
 
@@ -60,7 +60,6 @@ void FindFiles(char dir[256], std::vector<FileInfo>& files)
     cdir=opendir(dir);
     if(cdir!=NULL)
     {
-    	files.clear();
         while((direntry=readdir(cdir))!=NULL)
         {
             if(lstat(direntry->d_name,&fileinfo)!=0){
@@ -82,17 +81,27 @@ void FindFiles(char dir[256], std::vector<FileInfo>& files)
 }
 
 void PrintAll(std::vector<FileInfo>& files){
-	std::vector<FileInfo>::iterator at = files.begin();
-	for (; at != files.end(); at++){
-		at->Print();
-	}
+    std::vector<FileInfo>::iterator at = files.begin();
+    for (; at != files.end(); at++){
+        at->Print();
+    }
 }
 
 int main(int argc, char* argv[]){
-	std::vector<FileInfo> names;
+    std::vector<FileInfo> names;
+    std::vector<std::string> folders;
 
-	FindFiles(argv[1], names);
-	PrintAll(names);
+    if (argc == 1){
+        FindFiles(".", names);
+    }
+    else{
+        for (int i = 1; i < argc; i++){
+            std::string path(argv[i]);
+            FindFiles(argv[i], names);
+        }
+    }
 
-	return 0;
+    PrintAll(names);
+
+    return 0;
 }
