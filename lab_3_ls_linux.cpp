@@ -1,97 +1,100 @@
 
 /*
- *	OS Lab #3.
+ *		OS Lab #3.
  *  	My 'ls' command 
  *  	от 1024 до 2047 байт — в следующий интервал и т.д.).
  *
  *  	OS Linux
  *
- *	Author: Andriy Tokarskiy
- *	IASA, DA-32, Variant #21
+ *		Author: Andriy Tokarskiy
+ *		IASA, DA-32, Variant #21
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <string>
-#include <limits.h>
 #include <vector>
-
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include <unistd.h>
+#include <unistd.h> //chdir
+#include <pwd.h>
+#include <grp.h>
+#include <time.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 
-void readDirectory (std::string dirName, 
-		std::vector<std::string>& names,
-		std::vector<bool>& isFolder) {
-	DIR* dir = NULL;
-	struct dirent entry;
-	struct dirent *entryPointer = NULL;
-	char pathName[PATH_MAX];
-
-	dir = opendir(dirName.c_str());
-	if (dir == NULL){
-		printf("Error opening %s\n", dirName.c_str());
+struct FileInfo{
+    std::string name;
+    mode_t mode;
+    nlink_t nlink;
+    std::string uid;
+    std::string gid;
+    off_t size;
+    time_t mtim;
+	
+	void Print(){
+		printf((S_ISDIR(mode)) ? "d" : "-");
+        printf((mode & S_IRUSR) ? "r" : "-");
+        printf((mode & S_IWUSR) ? "w" : "-");
+        printf((mode & S_IXUSR) ? "x" : "-");
+        printf((mode & S_IRGRP) ? "r" : "-");
+        printf((mode & S_IWGRP) ? "w" : "-");
+        printf((mode & S_IXGRP) ? "x" : "-");
+        printf((mode & S_IROTH) ? "r" : "-");
+        printf((mode & S_IWOTH) ? "w" : "-");
+        printf((mode & S_IXOTH) ? "x" : "-");
+        printf("%4d %7s %7s ", nlink, uid.c_str(), gid.c_str());
+        time ( &mtim);
+		
+		printf("%7d ", (int)size);
+        printf("%30s   ", name.c_str());
+        printf ( "%s", ctime (&mtim) );
 	}
+};
 
-	readdir_r(dir, &entry, &entryPointer);
-	while (entryPointer != NULL){
-		struct stat entryInfo;
 
-		int compare1 = strncmp(entry.d_name, ".", PATH_MAX);
-		int compare2 = strncmp(entry.d_name, "..", PATH_MAX);
-		// ignore . and .. folders
-		if (compare1 == 0 || compare2 == 0){
-			//next file
-			readdir_r(dir, &entry, &entryPointer);
-			continue;
-		}
-
-		strncpy(pathName, dirName.c_str(), PATH_MAX);
-		strncat(pathName, "/", PATH_MAX);
-        strncat(pathName, entry.d_name, PATH_MAX);
-
-        std::string fileName(entry.d_name); 
-        
-
-        if (lstat(pathName, &entryInfo) == 0){
-        	// if it is folder
-        	names.push_back(fileName);
-        	isFolder.push_back(S_ISDIR(entryInfo.st_mode));
+void FindFiles(char dir[256], std::vector<FileInfo>& files)
+{
+    DIR *cdir;
+    dirent *direntry; // struct
+    struct stat fileinfo;
+    chdir(dir); //change working directory
+    cdir=opendir(dir);
+    if(cdir!=NULL)
+    {
+    	files.clear();
+        while((direntry=readdir(cdir))!=NULL)
+        {
+            if(lstat(direntry->d_name,&fileinfo)!=0){
+                continue;
+            }
+            FileInfo tempDir;
+            tempDir.name = direntry->d_name;
+            tempDir.mode = fileinfo.st_mode;
+            tempDir.nlink = fileinfo.st_nlink;
+            struct passwd *pw = getpwuid(fileinfo.st_uid);
+            struct group  *gr = getgrgid(fileinfo.st_gid);
+            tempDir.uid = std::string(pw->pw_name);
+            tempDir.gid = std::string(gr->gr_name);
+            tempDir.size = fileinfo.st_size;
+            tempDir.mtim = fileinfo.st_mtime;
+            
+            files.push_back(tempDir);
         }
-        else{
-        	continue;
-        }
-        // next file
-        readdir_r(dir, &entry, &entryPointer);
+    }
+}
+
+void PrintAll(std::vector<FileInfo>& files){
+	std::vector<FileInfo>::iterator at = files.begin();
+	for (; at != files.end(); at++){
+		at->Print();
 	}
-	closedir(dir);
 }
 
 int main(int argc, char* argv[]){
-	std::vector<std::string> names;
-	std::vector<std::string> folders;
-	std::vector<bool> isFolder;
-	if (argc == 1){
-		folders.push_back(".");
-	}
-	else
-	{
-		for (int i = 1; i < argc; i++){
-			std::string folderName(argv[i]);
-			folders.push_back(folderName);
-		}
-	}
+	std::vector<FileInfo> names;
 
-	for (int i = 0; i < folders.size(); i++){
-		readDirectory(folders[i], names, isFolder);
-	}
-
-	for (int i = 0; i < names.size(); i++) {
-		printf("%40s %6s\n", names[i].c_str(), isFolder[i] ? "FOLDER" : "FILE");
-	}
+	FindFiles(argv[1], names);
+	PrintAll(names);
 
 	return 0;
 }
