@@ -62,8 +62,13 @@ void* PhilosopherTask(void* id){
 
 	while(true) {
 		Think(philosopher_id);
-		pthread_mutex_lock(&resourses[resourse1_id]);
-		pthread_mutex_lock(&resourses[resourse2_id]);
+		if (pthread_mutex_trylock(&resourses[resourse1_id]) != 0){
+			continue;
+		}
+		if (pthread_mutex_trylock(&resourses[resourse2_id]) != 0){
+			pthread_mutex_unlock(&resourses[resourse1_id]);
+			continue;
+		}
 		Eat(philosopher_id);
 		pthread_mutex_unlock(&resourses[resourse2_id]);
 		pthread_mutex_unlock(&resourses[resourse1_id]);
