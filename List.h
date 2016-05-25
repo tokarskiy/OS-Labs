@@ -1,4 +1,7 @@
 
+#pragma once
+#include <cstddef>
+
 template<class T>
 class Node {
 private:
