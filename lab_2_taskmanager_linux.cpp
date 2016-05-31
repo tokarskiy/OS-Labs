@@ -6,7 +6,7 @@
  *	Author: Andriy Tokarskiy
  *	IASA, DA-32, Variant #21
  */
- 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +16,11 @@
 #include <algorithm>
 #include <sys/types.h>
 #include <string>
+#include <unistd.h>
+
+#define WITHOUT_SORT_KEY 0
+#define SORT_BY_NAME_KEY 1
+#define SORT_BY_ID_KEY 2
 
 struct ProcessInfo{
 	std::string name;
@@ -123,11 +128,11 @@ void PrintProcesses(const int sort){
 	GetProcessesInfo(processes);
 
 	switch (sort){
-		case 1:
+		case SORT_BY_NAME_KEY:
 			std::sort(processes.begin(), processes.end(), 
 				CompareProcessesByName);
 			break;
-		case 2:
+		case SORT_BY_ID_KEY:
 			std::sort(processes.begin(), processes.end(), 
 				CompareProcessesById);
 			break;
@@ -139,20 +144,22 @@ void PrintProcesses(const int sort){
 }
 
 int main(int argc, char* argv[]){
+	system("clear");
 	if (argc == 2){
 		std::string command(argv[1]);
 		if (command == "-sortbyname"){
-			PrintProcesses(1);
+			PrintProcesses(SORT_BY_NAME_KEY);
 		}
 		else if (command == "-sortbyid"){
-			PrintProcesses(2);
+			PrintProcesses(SORT_BY_ID_KEY);
 		}
 		else{
 			printf("Undefined command: %s\n", argv[1]);
-		}
+		}	
 	}
 	else{
-		PrintProcesses(0);
+		PrintProcesses(WITHOUT_SORT_KEY);
 	}
+	
 	return 0;
 }
