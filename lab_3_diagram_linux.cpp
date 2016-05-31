@@ -30,11 +30,12 @@
 #include <dirent.h>
 #include <unistd.h>
 
-#define DIAGRAM_STEP 200
+#define DIAGRAM_STEP 1
+#define SIZE_STEP 1024
+
 
 void readDirectory (std::string dirName, 
-					std::vector<long>& sizes, 
-					std::vector<std::string>& names) {
+					std::vector<long>& sizes) {
 	DIR* dir = NULL;
 	struct dirent entry;
 	struct dirent *entryPointer = NULL;
@@ -66,13 +67,12 @@ void readDirectory (std::string dirName,
         	// if it is folder
         	if (S_ISDIR(entryInfo.st_mode)){
         		std::string dirName(pathName);
-        		readDirectory(dirName, sizes, names);
+        		readDirectory(dirName, sizes);
         	}
         	// if it is a simple file
         	else if (S_ISREG(entryInfo.st_mode)){
         		sizes.push_back((int)entryInfo.st_size);
         		std::string fileName(pathName); 
-        		names.push_back(fileName);
         	}
         }
         else{
@@ -86,21 +86,19 @@ void readDirectory (std::string dirName,
 
 int main(int argc, char* argv[]){
 	std::vector<long> sizes;
-	std::vector<std::string> names;
 	std::string directory = argc == 2 ? argv[1] : ".";
 	std::map<long, int> statistic;
 
-	readDirectory(directory, sizes, names);
+	readDirectory(directory, sizes);
 
 	for (int i = 0; i < sizes.size(); i++){
-		if (statistic.find(sizes[i] / 20000) != statistic.end()){
-			statistic[sizes[i] / 20000]++;
+		if (statistic.find(sizes[i] / SIZE_STEP) != statistic.end()){
+			statistic[sizes[i] /SIZE_STEP]++;
 		}
 		else{
-			statistic.insert(std::pair<long, int>(sizes[i] / 20000, 1));
+			statistic.insert(std::pair<long, int>(sizes[i] / SIZE_STEP, 1));
 
 		}
-		//printf("%ld %d\n", sizes[i] / 1024, statistic[sizes[i] / 1024]);
 	}
 	
 	std::map<long, int>::iterator at = statistic.begin();
