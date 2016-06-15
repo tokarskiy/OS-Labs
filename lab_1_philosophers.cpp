@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <iostream>
+#include <stdio.h>
 
 #define PHILOSOPHERS_COUNT 5
 
@@ -57,9 +58,9 @@ int main(){
 }
 
 void* PhilosopherTask(void* id){
-	long long philosopher_id = (int)id;
-	long long resourse1_id = (int)id;
-	long long resourse2_id = ((int)id + 1) % PHILOSOPHERS_COUNT;
+	long long philosopher_id = (long long)id;
+	long long resourse1_id = (long long)id;
+	long long resourse2_id = ((long long)id + 1) % PHILOSOPHERS_COUNT;
 
 	while(true) {
 		Think(philosopher_id);
