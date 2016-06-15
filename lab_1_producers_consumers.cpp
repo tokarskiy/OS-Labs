@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <iostream>
+#include <stdio.h>
 
 #define PRODUCERS_COUNT 2
 #define CONSUMERS_COUNT 3
@@ -55,14 +56,14 @@ int main(){
 	pthread_cond_init(&queue_not_full, NULL);
 	pthread_cond_init(&queue_not_empty, NULL);
 
-	for (int i = 0; i < PRODUCERS_COUNT; i++){
+	for (long long i = 0; i < PRODUCERS_COUNT; i++){
 		if (pthread_create(&producer_threads[i], NULL, ProducerTask, (void*)i) != 0){
 			std::cout << "Threads creation failed!\n";
 			return 1;
 		}
 	}
 
-	for (int i = 0; i < CONSUMERS_COUNT; i++){
+	for (long long i = 0; i < CONSUMERS_COUNT; i++){
 		if (pthread_create(&consumer_threads[i], NULL, ConsumerTask, (void*)i) != 0){
 			std::cout << "Threads creation failed!\n";
 			return 1;
@@ -87,7 +88,7 @@ int main(){
 }
 
 void* ProducerTask(void* id){
-	int producer_id = (int)id;
+	long long producer_id = (long long)id;
 
 	while (true){
 		pthread_mutex_lock(&adding);
@@ -96,14 +97,15 @@ void* ProducerTask(void* id){
 		}
 		resources->PushBack(resourcesCounter);
 		pthread_cond_signal(&queue_not_empty);
-		std::cout << "The producer #" << producer_id << " has pushed resource " << resourcesCounter << ".\n";
+		printf("The producer #%lld has pushed resource #%d.\n", producer_id, resourcesCounter);
 		pthread_mutex_unlock(&adding);
+		resourceCounter++;
 		Sleep(MIN_PRODUCER_DELAY, MAX_PRODUCER_DELAY);
 	}
 }
 
 void* ConsumerTask(void* id){
-	int consumer_id = (int)id;
+	long long consumer_id = (long long)id;
 
 	while(true){
 		pthread_mutex_lock(&reading);
@@ -112,7 +114,7 @@ void* ConsumerTask(void* id){
 		}
 		resources->PopFront();
 		pthread_cond_signal(&queue_not_full);
-		std::cout << "The consumer #" << consumer_id << " has got resource.\n";
+		printf("The consumer #%lld has got resource.\n", consumer_id);
 		pthread_mutex_unlock(&reading);
 		Sleep(MIN_CONSUMER_DELAY, MAX_CONSUMER_DELAY);
 	}
