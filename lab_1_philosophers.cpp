@@ -18,6 +18,7 @@
 #include <iostream>
 
 #define PHILOSOPHERS_COUNT 5
+
 #define MIN_THINKING_TIME 500000
 #define MAX_THINKING_TIME 1000000
 #define MIN_EATING_TIME 500000
@@ -27,8 +28,8 @@ pthread_mutex_t resourses[PHILOSOPHERS_COUNT];
 pthread_t threads[PHILOSOPHERS_COUNT]; 
 
 void* PhilosopherTask(void* id);
-void Think(int id);
-void Eat(int id);
+void Think(long long id);
+void Eat(long long id);
 
 int main(){
 	srand(time(NULL));
@@ -39,7 +40,7 @@ int main(){
 		}
 	}
 
-	for (int i = 0; i < PHILOSOPHERS_COUNT; i++){
+	for (long long i = 0; i < PHILOSOPHERS_COUNT; i++){
 		if (pthread_create(&threads[i], NULL, PhilosopherTask, (void*)i) != 0){
 			std::cout << "Threads creation failed!\n";
 			return 1;
@@ -56,9 +57,9 @@ int main(){
 }
 
 void* PhilosopherTask(void* id){
-	int philosopher_id = (int)id;
-	int resourse1_id = (int)id;
-	int resourse2_id = ((int)id + 1) % PHILOSOPHERS_COUNT;
+	long long philosopher_id = (int)id;
+	long long resourse1_id = (int)id;
+	long long resourse2_id = ((int)id + 1) % PHILOSOPHERS_COUNT;
 
 	while(true) {
 		Think(philosopher_id);
@@ -75,18 +76,18 @@ void* PhilosopherTask(void* id){
 	}
 }
 
-void Think(int id){
+void Think(long long id){
 	int min = MIN_THINKING_TIME;
 	int max = MAX_THINKING_TIME;
 
 	usleep(rand() % (max - min) + min);
 }
 
-void Eat(int id){
+void Eat(long long id){
 	int min = MIN_EATING_TIME;
 	int max = MAX_EATING_TIME;
 
-	std::cout << "Philosopher #" << id << " start eating.\n";
+	printf("Philosopher #%lld start eating.\n", id);
 	usleep(rand() % (max - min) + min);
-	std::cout << "Philosopher #" << id << " end eating.\n";
+	printf("Philosopher #%lld end eating.\n", id);
 }
