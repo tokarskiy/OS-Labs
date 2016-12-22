@@ -7,7 +7,6 @@
  *	Author: Andriy Tokarskiy
  *	IASA, DA-32, Variant #21
  */
-
 #include <Windows.h>
 #include <iostream>
 
@@ -16,8 +15,8 @@
 
 #define MIN_CUSTOMER_ENTER_DELAY 200 
 #define MAX_CUSTOMER_ENTER_DELAY 500
-#define MIN_CUTTING_TIME 750
-#define MAX_CUTTING_TIME 1500
+#define MIN_CUTTING_TIME 500
+#define MAX_CUTTING_TIME 1000
 
 /*#define MIN_CUSTOMER_ENTER_DELAY 750
 #define MAX_CUSTOMER_ENTER_DELAY 1500
@@ -37,6 +36,7 @@ void Wait(Semaphore semaphore);
 Semaphore clients_semaphore;
 Semaphore barber_semaphore;
 int waiting_clients_count;
+int free_seats = 5;
 Semaphore counter_semaphore;
 
 int main() {
@@ -46,7 +46,8 @@ int main() {
 	counter_semaphore = CreateSemaphore(NULL, 1, 1, NULL);
 
 	CreateThread(NULL, 0, BarberTask, NULL, 0, NULL);
-	for (int i = 0; i < CLIENTS_COUNT; i++) {
+	for (int i = 1; i <= CLIENTS_COUNT; i++) {
+		if(i!=1)free_seats-=1;
 		CreateThread(NULL, 0, ClientTask, (LPVOID)i, 0, NULL);
 		SleepRandomTime(MIN_CUSTOMER_ENTER_DELAY, MAX_CUSTOMER_ENTER_DELAY);
 	}
@@ -68,6 +69,7 @@ DWORD WINAPI BarberTask(LPVOID arg) {
 	while (true) {
 		Wait(counter_semaphore);
 		if (waiting_clients_count == 0) {
+			Sleep(500);
 			printf("Barber is sleeping.\n");
 		}
 		Release(counter_semaphore);
@@ -86,15 +88,16 @@ DWORD WINAPI BarberTask(LPVOID arg) {
 
 DWORD WINAPI ClientTask(LPVOID id) {
 	int client_id = (int)id;
-
 	Wait(counter_semaphore);
-	if (waiting_clients_count < QUEUE_SIZE) {
+	if (waiting_clients_count < QUEUE_SIZE-1) {
+		//int seats_left = QUEUE_SIZE - waiting_clients_count;
 		waiting_clients_count++;
 		Release(counter_semaphore);
-		printf("Customer #%d has entered a barber shop.\n", client_id);
+		printf("Customer #%d has entered a barber shop [%d]\n", client_id, free_seats); //waiting client counts still false
 		
 		Release(clients_semaphore);
 		Wait(barber_semaphore);
+		free_seats+=1;
 		printf("Barber is cutting hair of customer #%d\n", client_id);
 	}
 	else {
