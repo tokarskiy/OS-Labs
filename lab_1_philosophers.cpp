@@ -1,7 +1,7 @@
 
 
 /*
- *	OS Lab #1. 
+ *	OS Lab #1.  
  *	The dining philosophers problem solving using 
  *	mutex. OS Linux.
  *
